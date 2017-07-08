@@ -19,17 +19,17 @@ server_address = (server_address, 10000)
 print >>sys.stderr, 'connecting to %s port %s' % server_address
 sock.connect(server_address)
 try:
-    while True:
-        data = sock.recv(BUFF)
-        if data:
-            print >>sys.stderr, data
-            out_file.write(data)
-        else:
-            print >>sys.stderr, 'no more data'
-            break
+	while True:
+		data = sock.recv(BUFF)
+		if data:
+			print >>sys.stderr, data
+			out_file.write(data)
+		else:
+			print >>sys.stderr, 'no more data'
+			break
 
 
 finally:
-    print >>sys.stderr, 'closing socket'
-    sock.close()
-    out_file.close()
+	print >>sys.stderr, 'closing socket'
+	sock.close()
+	out_file.close()
