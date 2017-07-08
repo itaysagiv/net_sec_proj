@@ -23,8 +23,9 @@ try:
 		data = sock.recv(BUFF)
 		if data:
 			print >>sys.stderr, data
-			out_file.write(data)
+			out_file.write(decryptor.decrypt(data))
 		else:
+			#take care of last packet - to erase padding
 			print >>sys.stderr, 'no more data'
 			break
 

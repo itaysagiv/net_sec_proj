@@ -6,7 +6,6 @@ from functools import partial
 
 key = '0123456789abcdef'
 mode = AES.MODE_CBC
-encryptor = AES.new(key, mode, '0123456789abcdef')
 
 BUFF = 256
 
@@ -24,6 +23,7 @@ sock.listen(1)
 c = 0
 while True:
 	# Wait for a connection
+	encryptor = AES.new(key, mode, '0123456789abcdef')
 	print >>sys.stderr, 'waiting for a connection'
 	connection, client_address = sock.accept()
 	try:
@@ -44,5 +44,8 @@ while True:
 
 	finally:
 		# Clean up the connection
+		#last_pack_size = str(len(chunk))
+		#final_msg = '0'*(BUFF-len(last_pack_size)) + last_pack_size
+		#connection.sendall(encryptor.encrypt(final_msg))
 		connection.close()
 		c=0
