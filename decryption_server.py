@@ -42,6 +42,7 @@ while True:
 				if padding:
 					dec_data = dec_data[:-padding]
 				sock_out.sendto(dec_data,(vlc_address,out_port))
+				padding = 0
 	#stops at CTRC + C signal
 	except KeyboardInterrupt:
 		print >>sys.stderr, 'closing server'

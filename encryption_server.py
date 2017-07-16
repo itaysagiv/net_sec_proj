@@ -35,7 +35,7 @@ while True:
 		if data:
 			if len(data) % 16:
 				padding = 16 - (len(data) % 16)
-				data = data + '\0'*pading	#padding with zeros for AES encryption
+				data = data + '\0'*padding	#padding with zeros for AES encryption
 				sock_out.sendto(str(padding),(client_address,out_port))
 			enc_data = encryptor.encrypt(data)
 			print >>sys.stderr, 'transmited encrypted packet. size=%s' % len(data)
