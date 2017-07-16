@@ -6,6 +6,8 @@ from functools import partial
 
 BUFF = 1500
 
+print >>sys.stderr, '******* DECRYPTOR *******'
+
 # AES parameters
 key = '0123456789abcdef'
 mode = AES.MODE_CBC
@@ -21,7 +23,7 @@ out_port = int(sys.argv[4])
 # Create a listening socket for input
 sock_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 print >>sys.stderr, 'input port %s' % in_port
-sock_in.bind(('',in_port))
+sock_in.bind((server_address,in_port))
 
 #create a sending socket for encrypted output
 sock_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -31,7 +33,7 @@ while True:
 	try:
 		data,addr = sock_in.recvfrom(BUFF)
 		if data:
-			print >>sys.stderr, "recieved stream"
+			print >>sys.stderr, "recieved stream. size=%s" % len(data)
 			dec_data = decryptor.decrypt(data)
 			sock_out.sendto(dec_data,(vlc_address,out_port))
 	#stops at CTRC + C signal

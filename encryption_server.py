@@ -6,6 +6,8 @@ from functools import partial
 
 BUFF = 1500
 
+print >>sys.stderr, '******* ENCRYPTOR *******'
+
 # AES parameters
 key = '0123456789abcdef'
 mode = AES.MODE_CBC
@@ -34,6 +36,7 @@ while True:
 			if len(data) % 16:
 				data = data + '\0'*(16 - (len(data) % 16))	#padding with zeros for AES encryption
 			enc_data = encryptor.encrypt(data)
+			print >>sys.stderr, 'transmited encrypted packet. size=%s' % len(data)
 			sock_out.sendto(enc_data,(client_address,out_port))
 	#stops at CTRC + C signal
 	except KeyboardInterrupt:
