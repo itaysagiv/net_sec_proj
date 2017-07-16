@@ -13,42 +13,31 @@ IV = '0123456789abcdef'
 encryptor = AES.new(key, mode,IV)
 
 #recieve dest address from terminal
-#ffmpeg_address = (sys.argv[1],int(sys.argv[2]))
-#dest_address = (sys.argv[3],sys.argv[4])
-server_address = ''
-in_port = int(sys.argv[1])
-out_port = int(sys.argv[2])
+server_address = sys.argv[1]
+in_port = int(sys.argv[2])
+client_address = sys.argv[3]
+out_port = int(sys.argv[4])
 
 # Create a listening socket for input
-sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print >>sys.stderr, 'input from %s port %s' % (server_address,in_port)
+sock_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+print >>sys.stderr, 'input port %s' % in_port
 sock_in.bind((server_address,in_port))
-sock_in.listen(1)
 
 #create a sending socket for encrypted output
-sock_out = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print >>sys.stderr, 'output to %s port %s' % (server_address,out_port)
-sock_out.bind((server_address,out_port))
-sock_out.listen(1)
-
-#waiting for connection
-print >>sys.stderr, 'waiting for a connection...'
-connection, client_address = sock_out.accept()
+sock_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+print >>sys.stderr, 'output port %s' % out_port
 
 while True:
 	try:
-		data = sock_in.recv(BUFF)
+		data,addr = sock_in.recvfrom(BUFF)
 		if data:
-			print >>sys.stderr, 'recieving stream packet'
-			data = data + '/0'*(data.len()%16)	#padding with zeros for AES encryption
+			if len(data) % 16:
+				data = data + '\0'*(16 - (len(data) % 16))	#padding with zeros for AES encryption
 			enc_data = encryptor.encrypt(data)
-			connection.sendall(enc_data)
-		else:
-			encryptor = AES.new(key, mode,IV)
+			sock_out.sendto(enc_data,(client_address,out_port))
 	#stops at CTRC + C signal
 	except KeyboardInterrupt:
 		print >>sys.stderr, 'closing server'
-		connection.close()
 		sock_in.close()
 		sock_out.close()
 		break
