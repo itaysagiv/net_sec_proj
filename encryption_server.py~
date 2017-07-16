@@ -35,7 +35,9 @@ while True:
 		if data:
 			if len(data) % 16:
 				data = data + '\0'*(16 - (len(data) % 16))	#padding with zeros for AES encryption
+				sock_out.sendto('0',(client_address,out_port))
 			enc_data = encryptor.encrypt(data)
+			print >>sys.stderr, 'transmited encrypted packet. size=%s' % len(data)
 			sock_out.sendto(enc_data,(client_address,out_port))
 	#stops at CTRC + C signal
 	except KeyboardInterrupt:

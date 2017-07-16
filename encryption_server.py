@@ -34,7 +34,9 @@ while True:
 		data,addr = sock_in.recvfrom(BUFF)
 		if data:
 			if len(data) % 16:
-				data = data + '\0'*(16 - (len(data) % 16))	#padding with zeros for AES encryption
+				padding = 16 - (len(data) % 16)
+				data = data + '\0'*pading	#padding with zeros for AES encryption
+				sock_out.sendto(str(padding),(client_address,out_port))
 			enc_data = encryptor.encrypt(data)
 			print >>sys.stderr, 'transmited encrypted packet. size=%s' % len(data)
 			sock_out.sendto(enc_data,(client_address,out_port))

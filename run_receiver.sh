@@ -6,6 +6,6 @@ PROTO="udp"
 
 clear
 
-xterm -e cvlc $PROTO://127.0.0.1:8888 &
+xterm -e cvlc $PROTO://@127.0.0.1:8888 &
 
 xterm -e python decryption_server.py $IP $PORT 127.0.0.1 8888

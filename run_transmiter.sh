@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IP="127.0.0.1" #ip for out to decryption
+IP="132.73.202.38" #ip for out to decryption
 PORT="5555" #port for out to decryption
 
 PROTO="udp"

@@ -23,19 +23,25 @@ out_port = int(sys.argv[4])
 # Create a listening socket for input
 sock_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 print >>sys.stderr, 'input port %s' % in_port
-sock_in.bind(('',in_port))
+sock_in.bind((server_address,in_port))
 
 #create a sending socket for encrypted output
 sock_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 print >>sys.stderr, 'output port %s' % out_port
 
+padding = 0
 while True:
 	try:
 		data,addr = sock_in.recvfrom(BUFF)
 		if data:
-			print >>sys.stderr, "recieved stream. size=%s" % len(data)
-			dec_data = decryptor.decrypt(data)
-			sock_out.sendto(dec_data,(vlc_address,out_port))
+			if len(data) < 16: 	#case of incoming padding 
+				padding = int(data)
+			else:			#case of regular message
+				print >>sys.stderr, "recieved stream. size=%s" % len(data)
+				dec_data = decryptor.decrypt(data)
+				if padding:
+					dec_data = dec_data[:-padding]
+				sock_out.sendto(dec_data,(vlc_address,out_port))
 	#stops at CTRC + C signal
 	except KeyboardInterrupt:
 		print >>sys.stderr, 'closing server'
