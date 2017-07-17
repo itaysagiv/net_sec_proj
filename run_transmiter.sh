@@ -4,8 +4,8 @@ IP="192.168.10.103" #ip for out to decryption
 PORT="5555" #port for out to decryption
 
 PROTO="udp"
-VIDEO_FILE="c.mp4"
-VIDEO_TIME="2:00"
+VIDEO_FILE="v1.mp4"
+VIDEO_TIME="3:00"
 
 clear
 
