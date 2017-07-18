@@ -1,5 +1,5 @@
 #TO DO
-#change the way it detects the  starting point
+#change the way it detects the starting point
 #add more crotirior to the decision
 #maby devide each cunck to n sections and base the decision on the majority in the chunk
 
@@ -39,12 +39,7 @@ def check_intervals(train,test):
 	train_avg = get_avg(train)
 	res = time(test[1])-time(test[0])
 	start = next(test.index(elem) for elem in test if val(elem)>train_avg)
-	#print start
-	#start = int(round(start_time/(5/res)))
-	#print train_avg,5/res, len(test)/36, len(train)/36
-
 	test = test[start:]
-
 	predict=[]
 	for chunk in chunks(test,int(5/res)):
 		predict.append(get_avg(chunk))
@@ -73,7 +68,23 @@ def search_peeks(test,train,start):
 	for r in res:
 		ans[int(r)/5]=1
 	return ans
-
+def naiv_check(test,start,th):
+	test = test[int(start*10):]
+	res=[]
+	for i in range(0,len(test)-50,50):
+		s=0
+		for j in range(50):
+			s=s+val(test[i+j])
+		res.append(s/50)
+	ret=[]
+	for r in res:
+		if r>th:
+			ret.append(1)
+		else:
+			ret.append(0)
+	return ret
+	
+	
 vector = map(int, "1,0,1,0,1,1,0,1,1,0,0,1,0,1,1,0,0,0,1,1,1,0,0,1,0,1,1,0,0,1,0,1,0,1,1,0".split(','))
 TH = 0.5
 
@@ -83,13 +94,18 @@ with open(sys.argv[1],"r") as f:
 with open(sys.argv[2],"r") as f:
 	test = f.readlines()
 	test = test[1:-1]
-
-res1 = check_intervals(train,test)
-res2 = search_peeks(test,train,4.5)
-conf1 = confirm(vector,res1)
-conf2 = confirm(vector,res2)
-print conf1[0]
-print >>sys.stderr, 'hit ratio %d%%' % int(conf1[1])
-print conf2[0]
-print >>sys.stderr, 'hit ratio %d%%' % int(conf2[1])
-print vector
+print get_avg(train)*0.6
+res=[0]*4
+res[0] = check_intervals(train,test)
+res[1] = search_peeks(test,train,4.5)
+res[2] = [0]*36
+for i in range(35):
+	if res[1][i]:
+		res[2][i]=1
+	else:
+		res[2][i]=res[0][i]
+res[3]=naiv_check(test,4.5,30)
+for r in res:
+	conf = confirm(vector,r)
+	print conf[0]
+	print >>sys.stderr, 'hit ratio %d%%' % int(conf[1])
