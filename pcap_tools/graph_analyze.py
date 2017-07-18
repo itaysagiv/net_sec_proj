@@ -25,6 +25,54 @@ def chunks(l, n):
 	for i in range(0, len(l), n):
 		new.append(l[i:i + n])
 	return new
+def confirm(vector,result):
+	hit_vec=[]
+	hit_res=0
+	for i in range(0,36):
+		if vector[i]==result[i]:
+			hit_vec.append('H')
+			hit_res=hit_res+1
+		else:
+			hit_vec.append('M')
+	return hit_vec,int(100*(hit_res/36.0))
+def check_intervals(train,test):
+	train_avg = get_avg(train)
+	res = time(test[1])-time(test[0])
+	start = next(test.index(elem) for elem in test if val(elem)>train_avg)
+	#print start
+	#start = int(round(start_time/(5/res)))
+	#print train_avg,5/res, len(test)/36, len(train)/36
+
+	test = test[start:]
+
+	predict=[]
+	for chunk in chunks(test,int(5/res)):
+		predict.append(get_avg(chunk))
+	result=[]
+	for avg in predict:
+		if avg>train_avg:
+			result.append(1)
+		else:
+			result.append(0)
+	return result[:36]
+def search_peeks(test,train,start):
+	train_avg = get_avg(train)
+	TH=5
+	res=[]
+	for elem in test:
+		ind = test.index(elem)
+		if ind>TH and val(elem)>train_avg:
+			s=0
+			for i in range(1,TH):
+				s=s+val(test[ind-i])
+			av=float(s)/TH
+			if val(elem) > 5*av:
+				res.append(time(elem))
+	res = map(lambda x: x-start,res)
+	ans= [0]*36
+	for r in res:
+		ans[int(r)/5]=1
+	return ans
 
 vector = map(int, "1,0,1,0,1,1,0,1,1,0,0,1,0,1,1,0,0,0,1,1,1,0,0,1,0,1,1,0,0,1,0,1,0,1,1,0".split(','))
 TH = 0.5
@@ -36,37 +84,12 @@ with open(sys.argv[2],"r") as f:
 	test = f.readlines()
 	test = test[1:-1]
 
-train_avg = get_avg(train)
-res = time(test[1])-time(test[0])
-start = next(test.index(elem) for elem in test if val(elem)>train_avg)
-print start
-#start = int(round(start_time/(5/res)))
-print train_avg,5/res, len(test)/36, len(train)/36
-
-test = test[start:]
-
-predict=[]
-for chunk in chunks(test,int(5/res)):
-	predict.append(get_avg(chunk))
-result=[]
-for avg in predict:
-	if avg>TH*train_avg:
-		result.append(1)
-	else:
-		result.append(0)
-
-
-print predict
-print result
+res1 = check_intervals(train,test)
+res2 = search_peeks(test,train,4.5)
+conf1 = confirm(vector,res1)
+conf2 = confirm(vector,res2)
+print conf1[0]
+print >>sys.stderr, 'hit ratio %d%%' % int(conf1[1])
+print conf2[0]
+print >>sys.stderr, 'hit ratio %d%%' % int(conf2[1])
 print vector
-hit_vec=[]
-hit_res=0
-for i in range(0,36):
-	if vector[i]==result[i]:
-		hit_vec.append('H')
-		hit_res=hit_res+1
-	else:
-		hit_vec.append('M')
-print hit_vec
-print >> sys.stderr, 'hit retio of %d%%' % int(100*(hit_res/36.0))
-
