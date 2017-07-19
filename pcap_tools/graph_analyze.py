@@ -1,20 +1,18 @@
-#TO DO
-#change the way it detects the starting point
-#add more crotirior to the decision
-#maby devide each cunck to n sections and base the decision on the majority in the chunk
-
 import sys
+import numpy as np
+import os
 
 def time(line):
 	return float(line.split(",")[0].translate(None,'"'))
-def val(line):
-	return int(line.split(",")[1].translate(None,'"'))
-def get_avg(data):
+def val(line,i):
+	return int(line.split(",")[i].translate(None,'"'))
+def get_avg(data,g,start):
+	data[int(start*10):]
 	acc=0
 	cnt=0
 	for elem in data:
-		if val(elem):
-			acc=acc+val(elem)
+		if val(elem,g):
+			acc=acc+val(elem,g)
 			cnt=cnt+1
 	if cnt:
 		return acc/cnt
@@ -30,26 +28,12 @@ def confirm(vector,result):
 	hit_res=0
 	for i in range(0,36):
 		if vector[i]==result[i]:
-			hit_vec.append('H')
+			hit_vec.append(str(vector[i]))
 			hit_res=hit_res+1
 		else:
-			hit_vec.append('M')
-	return hit_vec,int(100*(hit_res/36.0))
-def check_intervals(train,test):
-	train_avg = get_avg(train)
-	res = time(test[1])-time(test[0])
-	start = next(test.index(elem) for elem in test if val(elem)>train_avg)
-	test = test[start:]
-	predict=[]
-	for chunk in chunks(test,int(5/res)):
-		predict.append(get_avg(chunk))
-	result=[]
-	for avg in predict:
-		if avg>train_avg:
-			result.append(1)
-		else:
-			result.append(0)
-	return result[:36]
+			hit_vec.append(str(result[i])+'*')
+	return int(100*(hit_res/36.0))
+
 def search_peeks(test,train,start):
 	train_avg = get_avg(train)
 	TH=5
@@ -68,17 +52,18 @@ def search_peeks(test,train,start):
 	for r in res:
 		ans[int(r)/5]=1
 	return ans
-def naiv_check(test,start,th):
-	test = test[int(start*10):]
+
+def naiv_check(test,g,start,th,eps):
+	test1 = test[int(start*10):]
 	res=[]
-	for i in range(0,len(test)-50,50):
+	for i in range(0,len(test1)-50,50):
 		s=0
 		for j in range(50):
-			s=s+val(test[i+j])
+			s=s+val(test1[i+j],g)
 		res.append(s/50)
 	ret=[]
 	for r in res:
-		if r>th:
+		if (th*(1-eps))<r<(th*(1+eps)):
 			ret.append(1)
 		else:
 			ret.append(0)
@@ -86,7 +71,6 @@ def naiv_check(test,start,th):
 	
 	
 vector = map(int, "1,0,1,0,1,1,0,1,1,0,0,1,0,1,1,0,0,0,1,1,1,0,0,1,0,1,1,0,0,1,0,1,0,1,1,0".split(','))
-TH = 0.5
 
 with open(sys.argv[1],"r") as f:
 	train = f.readlines()
@@ -94,18 +78,39 @@ with open(sys.argv[1],"r") as f:
 with open(sys.argv[2],"r") as f:
 	test = f.readlines()
 	test = test[1:-1]
-print get_avg(train)*0.6
-res=[0]*4
-res[0] = check_intervals(train,test)
-res[1] = search_peeks(test,train,4.5)
-res[2] = [0]*36
-for i in range(35):
-	if res[1][i]:
-		res[2][i]=1
-	else:
-		res[2][i]=res[0][i]
-res[3]=naiv_check(test,4.5,30)
-for r in res:
-	conf = confirm(vector,r)
-	print conf[0]
-	print >>sys.stderr, 'hit ratio %d%%' % int(conf[1])
+if len(sys.argv)>3:
+	start = float(sys.argv[3])
+else:
+	start=0
+
+max_ = 0,0,0
+for e1 in np.arange(0.2,0.8,0.01):
+	os.system('clear')
+	print >> sys.stderr, 'analyzing %d%%' % int(((e1-0.2)/0.6)*100)
+	ans1 = naiv_check(test,1,start,get_avg(train,1,start),e1)[:36]
+	for e2 in np.arange(0.2,0.8,0.01):
+		ans2 = naiv_check(test,2,start,get_avg(train,2,start),e2)[:36]
+		c=0
+		for i in range(0,len(ans1)):
+			if ans1[i]==ans2[i]:
+				c=c+1
+		if max_[0]<c:
+			max_=c,e1,e2
+print max_
+
+res1 = naiv_check(test,1,start,get_avg(train,1,start),max_[1])[:36]
+res2 = naiv_check(test,2,start,get_avg(train,2,start),max_[2])[:36]
+vec=[]
+for i in range(0,36):
+	try:
+		if res1[i]==res2[i]:
+			vec.append(res1[i])
+		else:
+			vec.append('?')
+	except IndexError:
+		print 'Incomplete vector'
+		break
+print res1
+print res2
+print vec
+print vector
