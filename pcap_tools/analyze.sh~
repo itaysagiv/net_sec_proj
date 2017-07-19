@@ -3,4 +3,4 @@
 START=4.5
 
 clear
-python graph_analyze.py train1.csv asaf.csv $START
+python graph_analyze.py train1.csv test1.csv $START

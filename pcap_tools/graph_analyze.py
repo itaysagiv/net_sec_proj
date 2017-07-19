@@ -70,7 +70,7 @@ def naiv_check(test,g,start,th,eps):
 	return ret
 	
 	
-vector = map(int, "1,0,1,0,1,1,0,1,1,0,0,1,0,1,1,0,0,0,1,1,1,0,0,1,0,1,1,0,0,1,0,1,0,1,1,0".split(','))
+vector = map(int, "1,0,1,0,1,1,1,0,0,1,0,1,0,1,1,0,1,1,0,0,0,1,1,0,1,0,1,0,1,1,1,0,0,1,0,1".split(','))
 
 with open(sys.argv[1],"r") as f:
 	train = f.readlines()
